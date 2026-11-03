@@ -2,4 +2,7 @@
 models/
 logs/
 
+# The project's virtual environment; recreate it from requirements.txt
+.venv/
+
 __pycache__/

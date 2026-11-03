@@ -3,3 +3,4 @@ requests
 psutil
 numpy
 sounddevice
+pynput

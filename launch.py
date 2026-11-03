@@ -31,8 +31,6 @@ STARTUP_TIMEOUT = 600  # seconds; the first start may need to download the model
 
 def start_model_server(server):
     """Start one llama serve process, sending its output to a log file."""
-    LOGS_DIR.mkdir(exist_ok=True)
-    log_file = open(LOGS_DIR / f"{server['name']}.log", "w")
     command = [
         "llama", "serve",
         "-hf", server["model"],
@@ -40,8 +38,8 @@ def start_model_server(server):
         "--no-webui",
         *server["extra_args"],  # the * unpacks the list into separate arguments
     ]
-    print(f"Starting {server['name']} model on port {server['port']} (log: {log_file.name})")
-    return subprocess.Popen(command, stdout=log_file, stderr=subprocess.STDOUT)
+    print(f"Starting {server['name']} model on port {server['port']}")
+    return subprocess.Popen(command, stderr=subprocess.STDOUT)
 
 
 def wait_until_ready(server, process):
