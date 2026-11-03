@@ -1,7 +1,4 @@
-"""The web UI. Run with: python app.py  then open http://127.0.0.1:5000"""
-
 from flask import Flask, render_template
-
 from game_status import get_status
 
 app = Flask(__name__)

@@ -1,0 +1,5 @@
+# Downloaded model files are large; they're fetched automatically on first run
+models/
+logs/
+
+__pycache__/
