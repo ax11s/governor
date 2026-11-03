@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!-- Reload the page every 3 seconds so the status stays fresh -->
+    <meta http-equiv="refresh" content="3">
+    <title>Governor</title>
+    <style>
+        body { font-family: sans-serif; background: #111; color: #eee; padding: 2rem; }
+        .row { margin: 0.75rem 0; font-size: 1.2rem; }
+        .dot { display: inline-block; width: 14px; height: 14px; border-radius: 50%; margin-right: 0.5rem; }
+        .on { background: #3c3; }
+        .off { background: #c33; }
+    </style>
+</head>
+<body>
+    <h1>Governor</h1>
+
+    {# Everything in {{ }} and {% %} is filled in by Flask before the page is sent #}
+    <div class="row">
+        <span class="dot {{ 'on' if status.game_running else 'off' }}"></span>
+        Game running: {{ "yes" if status.game_running else "no" }}
+    </div>
+
+    <div class="row">
+        <span class="dot {{ 'on' if status.game_started else 'off' }}"></span>
+        Match started: {{ "yes" if status.game_started else "no" }}
+        {% if status.game_started %}
+            ({{ status.game_time | int }} s)
+        {% endif %}
+    </div>
+</body>
+</html>
