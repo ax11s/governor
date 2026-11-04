@@ -7,8 +7,8 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 dtype = torch.bfloat16 if device == "cuda" else torch.float32
 
 model = AutoModelForMultimodalLM.from_pretrained(
-    model_id, dtype=dtype, device_map=device, trust_remote_code=True
-).eval()
+    model_id, dtype=dtype, trust_remote_code=True
+).to(device).eval()
 processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
 codec = processor.audio_tokenizer.to(device=device).eval()
 
@@ -29,9 +29,15 @@ def generate(conversation, generation_mode=None, **processor_kwargs):
         speech = codec.decode(out.audio_codes[:1, :, : out.audio_lengths[0]]).audio_values[0].float().cpu()
     return reply, speech
 
-reply, speech = generate([
-    {"role": "system", "content": "Respond with interleaved text and audio."},
-    {"role": "user", "content": "what is the capital of France?"},
-])
+_, speech = generate([
+    {"role": "system", "content": "Perform TTS in American English using a female voice."},
+    {"role": "user", "content": "The harbor was quiet that morning."},
+], generation_mode="audio")
+sf.write("speech.wav", speech.squeeze(0).numpy(), 24_000)
 
-print(reply)
+#reply, speech = generate([
+#    {"role": "system", "content": "Respond with interleaved text and audio."},
+#    {"role": "user", "content": "what is the capital of France?"},
+#])
+
+#print(reply)

@@ -34,5 +34,6 @@ Technology:
 A few words on the technology chosen for this project:
 
 Other cool stuff:
-- The project includes autoamtic tracking of models speeds and response times in logs
-- Wortks on Ram or VRAM (CPU and GPU inference are both supported)
+- The project includes autoamtic tracking of models speeds and response times in logs.
+- Wortks on Ram or VRAM (CPU and GPU inference are both supported).
+- The system includes error looping prevention, LLMs and SLMs (especially small ones) loop quite often so these guardrails are a must.
