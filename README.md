@@ -28,7 +28,7 @@ In Depth Explaination:
 
 Technology:
 1. ``LiquidAI/LFM3-Omni-2B`` model as the thinking LLM with voice and video capabilities
-2. ``LiquidAI/d1-2B`` model as the decision model
+2. ``LiquidAI/d1-omni-2B`` model as the decision model
 3. llama.cpp as the inference engine
 
 A few words on the technology chosen for this project:
@@ -37,3 +37,7 @@ Other cool stuff:
 - The project includes autoamtic tracking of models speeds and response times in logs.
 - Wortks on Ram or VRAM (CPU and GPU inference are both supported).
 - The system includes error looping prevention, LLMs and SLMs (especially small ones) loop quite often so these guardrails are a must.
+
+
+To do:
+- add threading for the user_loop function

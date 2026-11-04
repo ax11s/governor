@@ -12,6 +12,8 @@ model = AutoModelForMultimodalLM.from_pretrained(
 processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
 codec = processor.audio_tokenizer.to(device=device).eval()
 
+
+
 @torch.inference_mode()
 def generate(conversation, generation_mode=None, **processor_kwargs):
     inputs = processor.apply_chat_template(

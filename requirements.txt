@@ -1,0 +1,5 @@
+torch v.5.20
+sounddevice v
+transformers v   --- AutoModel, AutoModelForMultimodalLM, AutoProcessor
+keyboard v 
+numpy v 
