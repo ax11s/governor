@@ -1,4 +1,0 @@
-If the request is more complicated like "Show me an interesting video on youtube" or "Win a game of X" you should ask questions:
-1. example: What kind of video do you want to watch? Any topics in particular? How long should the video be?
-2. example: Any tips on winning the game?
-Or other questions of your choice (up to 3 questions max) with the goal of clarifying the means of reaching the goal.

@@ -12,32 +12,50 @@ Philosophy:
 
 
 Goal:
-Build an AI system that sees the users screen through a video feed and makes decisions based on the prompt provided to it.
+Build an AI system that sees the users screen and makes decisions based on the prompt provided to it.
 Example usage: "Win a game of Plants VS Zombies", "Open youtube", "Open the teams app".
 
 Overview of the structure:
-1. Main omnimodal AI - responsible for being the orchestrator between the user and the decision models. A user speaks to it, it writes a prompt for the decision model and starts the decision model loop.
-2. The Decision model executes steps until the main AI (or the user) says to end it or the goal is reached.
+1. Main omnimodal AI - responsible for being the orchestrator between the user and the other models. A user speaks to it, it writes a plan for the task and hands every step of it to the model that is best at it.
+2. The Vision model finds where to click on the screen. The Decision model looks at the result of each step and decides what happens next, until the goal is reached or the user says to stop.
 
 In Depth Explaination:
-1. Main model gets text or voice input for the user. Ex. "Win a level of Plants VS Zombies."
-2. The main model asks questions if needed. Ex. "Any tips on beating this one?"
-3. The main model plans the prompts, scopes out the environment and makes sure the model has limited choices of where to click, not to confuse it and to improve accuracy.
-4. The main model writes a loop and the ending condition so, there is a looped decision model that does the oversight and a decision model that does the actions. The decision model has a option to call on the main model when needed for things like thinking and or text input.
-5. If the loop succeeded at reaching the goal, it quits and informs the user. If the loop fails, it goes back to the main model for review and planning again.
+1. Main model gets voice input for the user (hold right alt and speak). Ex. "Win a level of Plants VS Zombies."
+2. The Decision model sorts the request: refuse it, end the chat, or go on. The main model asks questions if needed (max 2). Ex. "Any tips on beating this one?"
+3. If a saved skill fits the request the Decision model picks it. If not, the main model looks at the screen and plans the task as short lines, one action per line (CLICK, CLICK ALL, TYPE, WRITE, KEY, WAIT, LOOP).
+4. The plan is run line by line. CLICK goes to the Vision model, which points at the thing and the mouse clicks it. WRITE goes back to the main model for things like thinking and text input (ex. a search query for a documentary). The lines after LOOP repeat until the goal is reached, ex. for clicking the suns in Plants VS Zombies.
+5. After every click the Decision model looks at the screen and chooses: NEXT, WAIT, RETRY, STUCK or DONE.
+6. If the plan reached the goal, it is saved as a skill (a text file in skills/, easy to read and edit), so next time it runs without any planning, and the user is informed. If it fails, it goes back to the main model with the reason and the current screen, and a new plan is written (max 3 times).
+
+How to run it:
+1. Install llama.cpp (build b11960 or newer) and ``pip install -r requirements.txt``
+2. ``py configure.py`` to pick the microphone and the display
+3. ``py governor.py`` (the first start downloads the models)
+4. Hold escape to stop a running task
+
+Files:
+- governor.py - listens to the user, decides what to do with the request, picks or plans the skill
+- runner.py - runs a plan: screenshots, mouse and keyboard, the step by step loop, error recovery
+- models.py - starts the three models and holds the calls to them (think, say, point, ask)
+- configure.py - small CLI to set the microphone and the display
+- skills/ 
+- logs/ -
+- settings.json -
 
 Technology:
-1. ``LiquidAI/LFM3-Omni-2B`` model as the thinking LLM with voice and video capabilities
-2. ``LiquidAI/d1-omni-2B`` model as the decision model
-3. llama.cpp as the inference engine
+1. ``LiquidAI/LFM3-Omni-2B`` model (Q4_K_M) as the thinking LLM with voice and image capabilities
+2. ``LiquidAI/LFM3-VL-2B`` model (Q4_K_M) as the vision model that points at things on the screen
+3. ``LiquidAI/d1-omni-2B`` model (Q8_0, there is no Q4 build of it) as the decision model
+4. llama.cpp as the inference engine, one server for each model
 
 A few words on the technology chosen for this project:
+- A small LLM is bad at writing long structured text like JSON, it kept making up names and mixing the formats up. Plain lines that start with one of 7 words are something it can do, so that is what the plan is made of.
+- Each model only does what it is good at: the LLM writes, the Vision model points, the Decision model chooses. It is also cheap, so the loop can run a lot of steps.
 
 Other cool stuff:
-- The project includes autoamtic tracking of models speeds and response times in logs.
-- Wortks on Ram or VRAM (CPU and GPU inference are both supported).
-- The system includes error looping prevention, LLMs and SLMs (especially small ones) loop quite often so these guardrails are a must.
-
-
-To do:
-- add threading for the user_loop function
+- The project includes automatic tracking of models speeds and response times in logs (logs/governor.log).
+- Works on RAM or VRAM (CPU and GPU inference are both supported).
+- Quantized models (Q4_K_M) to keep memory usage low.
+- The system includes error looping prevention (max questions, max retries of a step, max new plans, max loops, escape to stop), LLMs and SLMs (especially small ones) loop quite often so these guardrails are a must.
+- When a plan runs out of steps the Decision model checks if the goal was really reached, if not a new plan is written.
+- The Decision model is warmed up on start, so the first request is not slow.
