@@ -135,7 +135,7 @@ def start_task(request):
         plan = parse(steps)
     log("plan:\n" + plan_text(plan))
 
-    say("On it. Hold escape to stop me.")
+    say("On it. Press escape to stop me.")
     ok, plan = run(goal, plan)
     if ok:
         os.makedirs("skills", exist_ok=True)

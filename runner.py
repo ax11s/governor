@@ -51,14 +51,26 @@ write_prompt = "Goal: {goal}\nWrite {what}.\nReply with the text to type only."
 # Decision model
 next_prompt = "What should happen next?"
 next_criteria = {
-    "NEXT": "The last step worked, the screen shows its result",
+    "NEXT": "The last step worked, but the goal is not reached yet",
     "WAIT": "The screen is still loading or changing",
     "RETRY": "The last step did not work, like a click that missed or did nothing",
     "STUCK": "Something unexpected is in the way, like a popup, an error or a different screen than the plan expects",
-    "DONE": "The goal is reached",
+    "DONE": "The goal is reached, what the goal asks for is already open on the screen, even if the plan has more steps",
 }
 next_state = "Goal: {goal}\nPlan:\n{plan}\nThe last step was {step}. The picture shows the screen after it."
-reached_prompt = "Is the goal reached? The picture shows the screen now."
+reached_prompt = "Is the goal reached? Is what the goal asks for, like the named app or website, open on the screen now?"
+
+
+# Escape stops the run, a press is remembered until the next check so a short click is not missed
+stop = False
+
+
+def press_escape(event):
+    global stop
+    stop = True
+
+
+keyboard.on_press_key("esc", press_escape)
 
 
 # Screen
@@ -199,7 +211,7 @@ def play(goal, plan):
     looked = False   # did the decision model look in this round
 
     while True:
-        if keyboard.is_pressed("esc"):
+        if stop:
             return False, "stopped", n
 
         # End of the plan
@@ -254,12 +266,18 @@ def play(goal, plan):
             if retries >= max_retries:
                 return False, f"the step did not work {retries} times", n
         else:  # NEXT
+            if n + 1 >= len(plan) and loop_start >= len(plan):  # the last step worked, so the goal is reached
+                return True, "done", n
+            if loop_start >= len(plan) and goal_reached(goal):  # the goal can be reached before the plan ends
+                return True, "done", n
             n += 1
             retries = 0
 
 
 # Play a plan, write a new one when it fails - (succeeded, the last plan)
 def run(goal, plan):
+    global stop
+    stop = False
     for attempt in range(max_fixes + 1):
         ok, reason, n = play(goal, plan)
         log(f"attempt {attempt + 1}: {reason}")

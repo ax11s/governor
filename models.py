@@ -14,7 +14,7 @@ os.makedirs("logs", exist_ok=True)
 
 # Config
 # Every model runs in its own llama.cpp server
-llama_dir = ""  # folder with llama-server.exe and llama-tts.exe, leave empty when they are on PATH
+llama_dir = r"C:\Users\ozikk\AppData\Local\Microsoft\WinGet\Packages\ggml.llamacpp_Microsoft.Winget.Source_8wekyb3d8bbwe"  # folder with llama-server.exe and llama-tts.exe, leave empty when they are on PATH
 llm_model = "LiquidAI/LFM3-Omni-2B-GGUF:Q4_K_M"  # planning, typing, transcribing and speaking
 vl_model = "LiquidAI/LFM3-VL-2B-GGUF:Q4_K_M"     # pointing at things on the screen
 d1_model = "LiquidAI/d1-Omni-2B-GGUF:Q8_0"       # quick decisions
