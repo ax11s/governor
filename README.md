@@ -59,3 +59,6 @@ Other cool stuff:
 - The system includes error looping prevention (max questions, max retries of a step, max new plans, max loops, escape to stop), LLMs and SLMs (especially small ones) loop quite often so these guardrails are a must.
 - When a plan runs out of steps the Decision model checks if the goal was really reached, if not a new plan is written.
 - The Decision model is warmed up on start, so the first request is not slow.
+
+To-dos and issues:
+- agent looping on dificult task, not finishing the task, instead the reasoning loops
