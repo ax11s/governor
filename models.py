@@ -106,8 +106,8 @@ def audio_to_base64(audio):
     return base64.b64encode(buffer.getvalue()).decode()
 
 
-def chat(name, content):
-    body = {"messages": [{"role": "user", "content": content}], "max_tokens": 1024}
+def chat(name, content, max_tokens=1024):
+    body = {"messages": [{"role": "user", "content": content}], "max_tokens": max_tokens}
     reply = post(name, "/v1/chat/completions", body)
     text = reply["choices"][0]["message"]["content"]
     if text is None:
@@ -116,14 +116,15 @@ def chat(name, content):
 
 
 # Main LLM - a text reply to a prompt, optionally looking at a screenshot or listening to a voice clip
-def think(prompt, image=None, audio=None):
+# max_tokens keeps short answers short, a small model keeps writing when it can
+def think(prompt, image=None, audio=None, max_tokens=1024):
     start = time.time()
     content = [{"type": "text", "text": prompt}]
     if image is not None:
         content.append({"type": "image_url", "image_url": {"url": image_to_url(image)}})
     if audio is not None:
         content.append({"type": "input_audio", "input_audio": {"data": audio_to_base64(audio), "format": "wav"}})
-    reply = chat("llm", content)
+    reply = chat("llm", content, max_tokens)
     log(f"llm {time.time() - start:.1f}s: {reply[:200]}")
     return reply
 
@@ -188,11 +189,14 @@ def point(things, image):
 
 
 # Decision model - answers to named questions about a text and/or a screenshot in one pass
-def ask(questions, image=None, state=None):
+# before is an optional second screenshot, the screen before the last step
+def ask(questions, image=None, state=None, before=None):
     start = time.time()
     images = []
     if image is not None:
         images.append(image_to_url(image))
+    if before is not None:
+        images.append(image_to_url(before))  # second, so the screen now is always the first picture
     reply = post("d1", "/v1/systemone", {"state": state, "questions": questions, "images": images})
     log(f"d1 {time.time() - start:.2f}s")
     return reply.get("answers", reply)

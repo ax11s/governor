@@ -1,8 +1,9 @@
-Philosophy:
-1. How can I know what to build?
+Thought process for this project:
+1. How can I know what to build with AI models locally?
 1.1. Automate repeatable things?
-1.2. Show something that brings real results with a fancy demo?
+1.2. Show something that brings real results with a "fancy" demo?
 1.3. What Repeatable actions are there in my life?
+1.4. Opening programs, searching for things
 
 2. Candidates
 2.1. A tool that monitors work and automatically logs things done with a chat bot that can edit logs and update goals - would be useful but complicated, hard to do a demo
@@ -20,18 +21,18 @@ Overview of the structure:
 2. The Vision model finds where to click on the screen. The Decision model looks at the result of each step and decides what happens next, until the goal is reached or the user says to stop.
 
 In Depth Explaination:
-1. Main model gets voice input for the user (hold right alt and speak). Ex. "Win a level of Plants VS Zombies."
+1. Main model gets voice input for the user (hold right alt and speak, or type the request in the terminal and press enter). Ex. "Win a level of Plants VS Zombies."
 2. The Decision model sorts the request: refuse it, end the chat, or go on. The main model asks questions if needed (max 2). Ex. "Any tips on beating this one?"
-3. If a saved skill fits the request the Decision model picks it. If not, the main model looks at the screen and plans the task as short lines, one action per line (CLICK, CLICK ALL, TYPE, WRITE, KEY, WAIT, LOOP).
-4. The plan is run line by line. CLICK goes to the Vision model, which points at the thing and the mouse clicks it. WRITE goes back to the main model for things like thinking and text input (ex. a search query for a documentary). The lines after LOOP repeat until the goal is reached, ex. for clicking the suns in Plants VS Zombies.
-5. After every click the Decision model looks at the screen and chooses: NEXT, WAIT, RETRY, STUCK or DONE.
-6. If the plan reached the goal, it is saved as a skill (a text file in skills/, easy to read and edit), so next time it runs without any planning, and the user is informed. If it fails, it goes back to the main model with the reason and the current screen, and a new plan is written (max 3 times).
+3. If a saved skill fits the request the Decision model picks it (and a second question checks it really fits). Steps are short lines, one action per line (CLICK, CLICK ALL, TYPE, WRITE, KEY, WAIT, LOOP, SWITCH). The models also get the names of the open windows, so they know what is already open, and SWITCH brings an open window to the front.
+4. A new task is worked out step by step. Each time the main model sees the goal, the screen, the window in front and every step done so far with its result, writes a short thought, and picks the next step (prompt in promtps/main_step.txt). After the step the checker (the Decision model) says if the screen got CLOSER to the goal, stayed the SAME, went FURTHER away, or is DONE, and that result goes back to the main model for the next step. The task is done only when both the main model and the checker say DONE.
+5. CLICK goes to the Vision model, which points at the thing and the mouse clicks it. WRITE goes back to the main model for things like a search query. The lines after LOOP repeat until the goal is reached, ex. for clicking the suns in Plants VS Zombies.
+6. A new task that reached the goal is saved as a skill (a text file in skills/, easy to read and edit), so next time it runs as a plan without any thinking. A saved skill is checked after every click (NEXT, WAIT, RETRY, STUCK or DONE), and if it fails the rest is worked out step by step.
 
 How to run it:
 1. Install llama.cpp (build b11960 or newer) and ``pip install -r requirements.txt``
 2. ``py configure.py`` to pick the microphone and the display
 3. ``py governor.py`` (the first start downloads the models)
-4. Hold escape to stop a running task
+4. Press escape to stop a running task
 
 Files:
 - governor.py - listens to the user, decides what to do with the request, picks or plans the skill
@@ -56,8 +57,8 @@ Other cool stuff:
 - The project includes automatic tracking of models speeds and response times in logs (logs/governor.log).
 - Works on RAM or VRAM (CPU and GPU inference are both supported).
 - Quantized models (Q4_K_M) to keep memory usage low.
-- The system includes error looping prevention (max questions, max retries of a step, max new plans, max loops, escape to stop), LLMs and SLMs (especially small ones) loop quite often so these guardrails are a must.
-- When a plan runs out of steps the Decision model checks if the goal was really reached, if not a new plan is written.
+- The system includes error looping prevention (max questions, max retries of a step, max steps of a new task, max steps in a row without progress, max loops, escape to stop), LLMs and SLMs (especially small ones) loop quite often so these guardrails are a must.
+- The title of the window in front (ex. "MrBeast - YouTube - Google Chrome") is given to the models, it tells a small model much more than the screenshot alone.
 - The Decision model is warmed up on start, so the first request is not slow.
 
 To-dos and issues:
