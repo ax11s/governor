@@ -2,7 +2,8 @@
 A simple computer control by voice project writte in a 3 days after work :)
 
 ## 🎬 "Fancy" demo
-<iframe width="560" height="315" src="https://www.youtube.com/embed/0CSZ1eEgQK4?si=wqCgJCqou5MyeT0Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/watch?v=0CSZ1eEgQK4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 
 
 
