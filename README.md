@@ -35,20 +35,11 @@ Technology:
 
 Models tried before: ``LiquidAI/LFM3-Omni-2B``, ``unsloth/NVIDIA-Nemotron-3.5-Bolt-E4B``, ``LiquidAI/LFM3-VL-2B``. All of these models turned out to be suboptimal on results and reliability, even though they exceeded on speed.
 
+
 A few words on the technology chosen for this project:
 - A small model is bad at writing long structured text like JSON or a long plan, it kept making up names, copying the examples of its prompt and mixing the formats up. One short step at a time, a line that starts with one of a few words, is something it can do, so that is what the tasks are made of.
 - Each model only does what it is good at: the brain thinks and writes, the Vision model points, the Decision model chooses. The Decision model is small and fast, so it can check every step.
 - The code checks what the models say where it can, like the window name for DONE and the website for GO, as small models say "done" too easily and copy the text of their prompt.
-
-Other cool stuff:
-- The project includes automatic tracking of models speeds and response times in logs (logs/governor.log).
-- Works on RAM or VRAM (CPU and GPU inference are both supported).
-- Quantized models (Q4) to keep memory usage low.
-- The mouse moves in curves at an uneven speed and the typing has uneven gaps, like a person, so websites do not take the assistant for a bot.
-- The system includes error looping prevention (max questions, max steps of a task, max steps in a row without progress, no repeating a step that just failed, max rounds of a game loop, asking the user for a tip at most 2 times, escape to stop), LLMs and SLMs (especially small ones) loop quite often so these guardrails are a must.
-- The title of the window in front (ex. "MrBeast - YouTube - Google Chrome") is given to the models, it tells a small model much more than the screenshot alone.
-- Screenshots are sent as JPEG and the pages are waited for by their window name, so a step is about a second faster than at the start.
-- The Decision model is warmed up on start, so the first request is not slow.
 
 
 When and why AI was used and when and why it was NOT used:
