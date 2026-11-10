@@ -1,0 +1,3 @@
+Point to each of these things in the picture, every one of them you can see:
+{things}
+Answer in JSON as a list of points: [{"point_2d": [x, y], "label": "<name>"}, ...] where the label is the name before the colon. Return [] if none are visible.

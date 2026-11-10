@@ -1,0 +1,4 @@
+CLOSER: The screen now shows more of what the goal names (its app, website or thing) than before, or something that leads to it, like the Start menu, a search box or a menu opened to find it, the right text typed into the right field, the address of the right website typed in, or the right page opened
+SAME: Nothing changed, the two pictures look the same, like a click that did nothing. Text that was typed and is now visible is a change, not SAME
+FURTHER: A different website, a search page about something else, an app with a similar name, or a wrong app opened, so the goal is now harder to reach than before. A step that worked but went somewhere else is FURTHER. Opening a menu or search box on the way to the goal is not FURTHER, it is CLOSER
+DONE: The goal is fully reached, the app and website in front are exactly what the goal names, not just a step toward it. A search page about it, an app with a similar name or a different part of it is not DONE

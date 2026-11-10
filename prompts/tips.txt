@@ -1,0 +1,2 @@
+Tips from the user, you asked for them when you were stuck before, follow them:
+{tips}

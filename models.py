@@ -8,29 +8,27 @@ import time
 import wave
 import numpy as np
 import requests
-import sounddevice as sd
+import prompts
 
 os.makedirs("logs", exist_ok=True)
 
 # Config
 # Every model runs in its own llama.cpp server
-llama_dir = r"C:\Users\ozikk\AppData\Local\Microsoft\WinGet\Packages\ggml.llamacpp_Microsoft.Winget.Source_8wekyb3d8bbwe"  # folder with llama-server.exe and llama-tts.exe, leave empty when they are on PATH
-llm_model = "LiquidAI/LFM3-Omni-2B-GGUF:Q4_K_M"  # planning, typing, transcribing and speaking
-vl_model = "LiquidAI/LFM3-VL-2B-GGUF:Q4_K_M"     # pointing at things on the screen
+llama_dir = r"C:\Users\ozikk\AppData\Local\Microsoft\WinGet\Packages\ggml.llamacpp_Microsoft.Winget.Source_8wekyb3d8bbwe"  # folder with llama-server.exe, leave empty when it is on PATH
+brain_model = "unsloth/NVIDIA-Nemotron-3.5-Bolt-E4B-GGUF:UD-Q4_K_XL"  # thinking: each step, typing, questions, and hearing the voice
+vl_model = "LiquidAI/LFM3-VL-2B-GGUF:Q4_K_M"     # seeing: pointing at things on the screen
 d1_model = "LiquidAI/d1-Omni-2B-GGUF:Q8_0"       # quick decisions
 
 servers = {
-    "llm": {"port": 8081, "model": llm_model, "flags": ["--reasoning", "off", "--temp", "0"]},
-    "vl": {"port": 8082, "model": vl_model, "flags": ["--top-p", "1.0", "--min-p", "0.0", "--no-reasoning-preserve"]},
+    "brain": {"port": 8084, "model": brain_model, "flags": ["--reasoning", "off", "--temp", "0"]},
+    # reasoning off: with it the VL model sometimes thinks until the token limit and never answers with the points
+    "vl": {"port": 8082, "model": vl_model, "flags": ["--reasoning", "off", "--top-p", "1.0", "--min-p", "0.0", "--no-reasoning-preserve"]},
     "d1": {"port": 8083, "model": d1_model, "flags": ["-b", "8192", "-ub", "8192"]},
 }
 
 context = 8192      # tokens per request
 audio_rate = 16000  # sample rate of the recorded voice clips
-voice = "female"    # or "male"
-point_prompt = """Point to each of these things in the picture, every one of them you can see:
-{things}
-Answer in JSON as a list of points: [{"point_2d": [x, y], "label": "<name>"}, ...] where the label is the name before the colon. Return [] if none are visible."""
+point_tokens = 400     # enough for many points
 warm_up_question = {"warm_up": {"type": "noul", "instructions": "Is this a test?"}}
 
 
@@ -70,7 +68,7 @@ def wait_for_server(name, process):
         time.sleep(1)
 
 
-def start_models(names=("llm", "vl", "d1")):
+def start_models(names=("brain", "vl", "d1")):
     print("Starting the models (the first start downloads them)...")
     processes = {}
     for name in names:
@@ -89,10 +87,11 @@ def post(name, path, body):
 
 
 # Converting the pictures and sound to the format servers want
+# JPEG instead of PNG: about 30 times faster to make and 4 times smaller, the text on it stays readable
 def image_to_url(image):
     buffer = io.BytesIO()
-    image.save(buffer, format="PNG")
-    return "data:image/png;base64," + base64.b64encode(buffer.getvalue()).decode()
+    image.save(buffer, format="JPEG", quality=90)
+    return "data:image/jpeg;base64," + base64.b64encode(buffer.getvalue()).decode()
 
 
 def audio_to_base64(audio):
@@ -115,34 +114,31 @@ def chat(name, content, max_tokens=1024):
     return text.strip()
 
 
-# Main LLM - a text reply to a prompt, optionally looking at a screenshot or listening to a voice clip
-# max_tokens keeps short answers short, a small model keeps writing when it can
-def think(prompt, image=None, audio=None, max_tokens=1024):
+# Brain - a text reply to a prompt, optionally looking at a screenshot
+# max_tokens keeps short answers short, a model keeps writing when it can
+def think(prompt, image=None, max_tokens=1024):
     start = time.time()
     content = [{"type": "text", "text": prompt}]
     if image is not None:
         content.append({"type": "image_url", "image_url": {"url": image_to_url(image)}})
-    if audio is not None:
-        content.append({"type": "input_audio", "input_audio": {"data": audio_to_base64(audio), "format": "wav"}})
-    reply = chat("llm", content, max_tokens)
-    log(f"llm {time.time() - start:.1f}s: {reply[:200]}")
+    reply = chat("brain", content, max_tokens)
+    log(f"brain {time.time() - start:.1f}s: {reply[:200]}")
     return reply
 
 
-# Main LLM - say a text out loud
+# Brain - writes down what is said in a voice clip
+def hear(prompt, audio):
+    start = time.time()
+    content = [{"type": "text", "text": prompt},
+               {"type": "input_audio", "input_audio": {"data": audio_to_base64(audio), "format": "wav"}}]
+    reply = chat("brain", content)
+    log(f"hear {time.time() - start:.1f}s: {reply[:200]}")
+    return reply
+
+
+# Old version was able to speak, this one only types
 def say(text):
     log("say: " + text)
-    command = [os.path.join(llama_dir, "llama-tts"), "-hf", llm_model, "--tts-voice", voice,
-               "-p", text, "-o", "logs/say.wav"]
-    result = subprocess.run(command, capture_output=True, text=True)
-    if result.returncode != 0:
-        log("speech failed: " + result.stderr[-500:])
-        return
-    with wave.open("logs/say.wav") as f:
-        samples = np.frombuffer(f.readframes(f.getnframes()), dtype=np.int16)
-        rate = f.getframerate()
-    sd.play(samples, rate)
-    sd.wait()
 
 
 # VL model - where things are on a screenshot
@@ -159,8 +155,8 @@ def point(things, image):
     for name in things:
         lines += f"- {name}: {things[name]}\n"
     content = [{"type": "image_url", "image_url": {"url": image_to_url(image)}},
-               {"type": "text", "text": point_prompt.replace("{things}", lines)}]
-    reply = chat("vl", content)
+               {"type": "text", "text": prompts.fill("point", {"things": lines})}]
+    reply = chat("vl", content, max_tokens=point_tokens)
     log(f"vl {time.time() - start:.1f}s: {reply[:200]}")
 
     items = []
@@ -180,11 +176,12 @@ def point(things, image):
             continue
         label = item.get("label")
         if label not in found:
-            if len(found) == 1:
-                label = list(found)[0]  # only one thing was asked for, so the point must be it
-            else:
+            if len(things) != 1:
                 continue
-        found[label].append((coordinates[0] / 1000, coordinates[1] / 1000))  # the model uses values from 0 to 1000
+            for name in things:  # only one thing was asked for, so the point must be it
+                label = name
+        x, y = coordinates
+        found[label].append((x / 1000, y / 1000))  # the model uses values from 0 to 1000, this is a fraction of the screenshot
     return found
 
 

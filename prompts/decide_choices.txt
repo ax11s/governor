@@ -1,0 +1,5 @@
+REFUSE: The goal does not include computer use or would take more than 10 hours to complete
+QUESTION_GOAL: The goal is too ambiguous and needs more clarity
+QUESTION_TIPS: The request is technically complicated, like 'Show me an interesting video on youtube' or 'Win a game of X'
+CONTINUE: The goal is doable and clear, like opening a named app, game or website
+END: The user is not giving a goal, like talking about their personal life or asking questions

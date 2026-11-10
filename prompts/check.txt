@@ -1,0 +1,1 @@
+Compare the window before and after the last step with the goal. Is the screen now closer to what the goal names?

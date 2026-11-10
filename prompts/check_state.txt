@@ -1,0 +1,9 @@
+Goal: {goal}
+Steps done so far:
+{steps}
+The last step was: {step}
+The window in front before the step: {before}
+The window in front now: {after}
+The app and website in front now: {place}
+The screen changed after the step: {moved}
+The first picture is the screen now, the second picture is the screen before the step.

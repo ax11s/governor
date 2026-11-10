@@ -2,64 +2,75 @@ Thought process for this project:
 1. How can I know what to build with AI models locally?
 1.1. Automate repeatable things?
 1.2. Show something that brings real results with a "fancy" demo?
-1.3. What Repeatable actions are there in my life?
+1.3. What repeatable actions are there in my life?
 1.4. Opening programs, searching for things
+
+"Fancy" demo:
+
 
 2. Candidates
 2.1. A tool that monitors work and automatically logs things done with a chat bot that can edit logs and update goals - would be useful but complicated, hard to do a demo
 2.2. Build a system that automatically play plants vs zombies - simple and looks kinda fun as a demo but is not real comercial use candidate
 2.3. Ultra-focus tool that has managed environments where a decision model chooses what apps to open and locks opening other apps until a result is reached
 2.4. A calendar app that automatically places new tasks and appointments and learns though docs via the LLM = simple, usable, self learning
-
+2.5. Navigation, task automation and simple computer use by voice <--- in the end it landed on this one, simple, yet useful
 
 Goal:
 Build an AI system that sees the users screen and makes decisions based on the prompt provided to it.
-Example usage: "Win a game of Plants VS Zombies", "Open youtube", "Open the teams app".
+Example usage: "Open youtube", "Open MrBeast's YouTube channel", "Start a game in Plants vs Zombies"
 
-Overview of the structure:
-1. Main omnimodal AI - responsible for being the orchestrator between the user and the other models. A user speaks to it, it writes a plan for the task and hands every step of it to the model that is best at it.
-2. The Vision model finds where to click on the screen. The Decision model looks at the result of each step and decides what happens next, until the goal is reached or the user says to stop.
-
-In Depth Explaination:
-1. Main model gets voice input for the user (hold right alt and speak, or type the request in the terminal and press enter). Ex. "Win a level of Plants VS Zombies."
-2. The Decision model sorts the request: refuse it, end the chat, or go on. The main model asks questions if needed (max 2). Ex. "Any tips on beating this one?"
-3. If a saved skill fits the request the Decision model picks it (and a second question checks it really fits). Steps are short lines, one action per line (CLICK, CLICK ALL, TYPE, WRITE, KEY, WAIT, LOOP, SWITCH). The models also get the names of the open windows, so they know what is already open, and SWITCH brings an open window to the front.
-4. A new task is worked out step by step. Each time the main model sees the goal, the screen, the window in front and every step done so far with its result, writes a short thought, and picks the next step (prompt in promtps/main_step.txt). After the step the checker (the Decision model) says if the screen got CLOSER to the goal, stayed the SAME, went FURTHER away, or is DONE, and that result goes back to the main model for the next step. The task is done only when both the main model and the checker say DONE.
-5. CLICK goes to the Vision model, which points at the thing and the mouse clicks it. WRITE goes back to the main model for things like a search query. The lines after LOOP repeat until the goal is reached, ex. for clicking the suns in Plants VS Zombies.
-6. A new task that reached the goal is saved as a skill (a text file in skills/, easy to read and edit), so next time it runs as a plan without any thinking. A saved skill is checked after every click (NEXT, WAIT, RETRY, STUCK or DONE), and if it fails the rest is worked out step by step.
 
 How to run it:
-1. Install llama.cpp (build b11960 or newer) and ``pip install -r requirements.txt``
-2. ``py configure.py`` to pick the microphone and the display
-3. ``py governor.py`` (the first start downloads the models)
-4. Press escape to stop a running task
+1. Python 3.10 or newer, install llama.cpp (build b11960 or newer) and ``pip install -r requirements.txt``
+2. Set ``llama_dir`` in models.py to the folder of llama-server.exe (or leave it empty when llama.cpp is on PATH)
+3. ``py configure.py`` to pick the microphone and the display
+4. ``py governor.py`` (the first start downloads the models)
+5. Press escape to stop a running task
 
-Files:
-- governor.py - listens to the user, decides what to do with the request, picks or plans the skill
-- runner.py - runs a plan: screenshots, mouse and keyboard, the step by step loop, error recovery
-- models.py - starts the three models and holds the calls to them (think, say, point, ask)
-- configure.py - small CLI to set the microphone and the display
-- skills/ 
-- logs/ -
-- settings.json -
 
 Technology:
-1. ``LiquidAI/LFM3-Omni-2B`` model (Q4_K_M) as the thinking LLM with voice and image capabilities
-2. ``LiquidAI/LFM3-VL-2B`` model (Q4_K_M) as the vision model that points at things on the screen
-3. ``LiquidAI/d1-omni-2B`` model (Q8_0, there is no Q4 build of it) as the decision model
-4. llama.cpp as the inference engine, one server for each model
+1. ``google/Gemma-4-E4B-it-GGUF`` for thinking and vision
+3. ``LiquidAI/d1-omni-2B Q4`` for simple decisions
+4. llama.cpp as the inference engine
+
+Models tried before: ``LiquidAI/LFM3-Omni-2B``, ``unsloth/NVIDIA-Nemotron-3.5-Bolt-E4B``, ``LiquidAI/LFM3-VL-2B``. All of these models turned out to be suboptimal on results and reliability, even though they exceeded on speed.
 
 A few words on the technology chosen for this project:
-- A small LLM is bad at writing long structured text like JSON, it kept making up names and mixing the formats up. Plain lines that start with one of 7 words are something it can do, so that is what the plan is made of.
-- Each model only does what it is good at: the LLM writes, the Vision model points, the Decision model chooses. It is also cheap, so the loop can run a lot of steps.
+- A small model is bad at writing long structured text like JSON or a long plan, it kept making up names, copying the examples of its prompt and mixing the formats up. One short step at a time, a line that starts with one of a few words, is something it can do, so that is what the tasks are made of.
+- Each model only does what it is good at: the brain thinks and writes, the Vision model points, the Decision model chooses. The Decision model is small and fast, so it can check every step.
+- The code checks what the models say where it can, like the window name for DONE and the website for GO, as small models say "done" too easily and copy the text of their prompt.
 
 Other cool stuff:
 - The project includes automatic tracking of models speeds and response times in logs (logs/governor.log).
 - Works on RAM or VRAM (CPU and GPU inference are both supported).
-- Quantized models (Q4_K_M) to keep memory usage low.
-- The system includes error looping prevention (max questions, max retries of a step, max steps of a new task, max steps in a row without progress, max loops, escape to stop), LLMs and SLMs (especially small ones) loop quite often so these guardrails are a must.
+- Quantized models (Q4) to keep memory usage low.
+- The mouse moves in curves at an uneven speed and the typing has uneven gaps, like a person, so websites do not take the assistant for a bot.
+- The system includes error looping prevention (max questions, max steps of a task, max steps in a row without progress, no repeating a step that just failed, max rounds of a game loop, asking the user for a tip at most 2 times, escape to stop), LLMs and SLMs (especially small ones) loop quite often so these guardrails are a must.
 - The title of the window in front (ex. "MrBeast - YouTube - Google Chrome") is given to the models, it tells a small model much more than the screenshot alone.
+- Screenshots are sent as JPEG and the pages are waited for by their window name, so a step is about a second faster than at the start.
 - The Decision model is warmed up on start, so the first request is not slow.
 
-To-dos and issues:
-- agent looping on dificult task, not finishing the task, instead the reasoning loops
+
+When and why AI was used and when and why it was NOT used:
+In the beginning no AI was used to setup a solid structure of the project for the models to understand. Some code (by Claude AND Qwen) were not written in a format that was concise and fast enough. Some parts did not make sense too - though I did make some mistakes too, like using 3 separate models, with two of the model overlapping. This caused the models to be worse at thinking through stepts, and although it is not perfect in its current state, it is much better with Gemma 4 E4B as the thinking model than with the 2b omni model from LiquidAI.
+
+Later on the speed of development was not good enough for me and the main structure of the project was already done, so I have setteled for using LLMs in the process to finish it faster (and with good results, even though corrections in the system logic were needed).
+
+Even in this ReadMe file (which in about 80% was initially written by Opus 5.5) there were a lot of mistakes, and the process was not documented well - LLMs make mistakes (which are often costly), a lot of people forget that nowadays - from on-job experience, sadly.
+
+
+The rest was written by hand.
+In total, around 59% of the code was written by hand and around 41% by Claude and Qwen (the functions listed below, approximately 342 of 835 lines of code, not counting empty lines and comments). - yes, this was counter by Claude :)
+
+
+Functions written by Claude (Opus 5.5 High) and Qwen3.8 Flash Next (locally hosted - Q3_S, MTP, High):
+- screen.py: screen_changed(), open_windows(), active_title(), window_place(), switch()
+- hands.py: move() - the improved version, go_address(), wait_for_page(), case "WAIT" in do_step()
+- runner.py: parse(), press_escape(), clean_step(), goal_name(), goal_thing(), title_missing(), check(), loop(), read_step(), fix_step(), find_problem(), major part of run(), logging
+- models.py: hear()
+- governor.py: read_typed(), reply_to(), ask_for_help()
+- most of the comments were written by Claude (which it did quite well)
+
+
+Fun fact:
+The bots detection prevention is far from perfect, so I got IP banned from stack overflow lol :D

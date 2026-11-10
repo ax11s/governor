@@ -1,0 +1,3 @@
+CLOSER: closer to the goal
+SAME: nothing changed on the screen
+FURTHER: WRONG DIRECTION, this is not what the goal names. Go back (KEY alt+left in a browser) and try something different

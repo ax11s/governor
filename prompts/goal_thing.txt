@@ -1,0 +1,3 @@
+Request: {goal}
+
+When this request is fully done, what does it want to see inside that app or website? Copy those exact words from the request, the name itself and not what kind of thing it is. Reply with those words only, or NONE when it is nothing specific or only the app or website itself.

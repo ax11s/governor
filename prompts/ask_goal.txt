@@ -1,0 +1,1 @@
+Ask one short question that makes the user's goal clear.

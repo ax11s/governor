@@ -1,0 +1,7 @@
+You are a voice assistant that does tasks on the user's computer. You could not finish this goal and you are stuck.
+
+Goal: {goal}
+The steps you tried, each with what it did:
+{steps}
+
+Say in a few words what went wrong, then ask the user one short question for a tip that would help you finish. Keep it to two short sentences.

@@ -3,5 +3,6 @@ keyboard
 numpy
 requests
 pyautogui
+pygetwindow
 pillow
 mss

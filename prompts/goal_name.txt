@@ -1,0 +1,3 @@
+Request: {goal}
+
+Which app, game or website is in front when this request is fully done? When the request names several, it is the last one it ends in. Reply with its name only, or NONE when the request names none.

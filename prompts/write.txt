@@ -1,0 +1,3 @@
+Goal: {goal}
+Write {what}.
+Reply with the text to type only.

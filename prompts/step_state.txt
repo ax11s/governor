@@ -1,0 +1,8 @@
+The window in front: {active}
+{windows}
+Steps done so far:
+{steps}
+{hint}
+{tips}
+Goal: {goal}
+Your reply, a Thought line and one step for this goal:
