@@ -1,4 +1,5 @@
 # Governor
+A simple computer control by voice project writte in a 3 days after work :)
 
 ## 🎬 "Fancy" demo
 
