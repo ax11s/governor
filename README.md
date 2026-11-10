@@ -2,9 +2,9 @@
 
 ## 🎬 "Fancy" demo
 
-<!-- demo goes here -->
 
----
+
+
 
 ## 💭 Thought process for this project (finding what to build)
 
@@ -20,7 +20,9 @@
    4. A calendar app that automatically places new tasks and appointments and learns though docs via the LLM = simple, usable, self learning
    5. **Navigation, task automation and simple computer use by voice** ⬅️ in the end it landed on this one, simple, yet useful
 
----
+
+
+
 
 ## 🎯 Goal
 
@@ -30,7 +32,8 @@ Build an AI system that sees the users screen and makes decisions based on the p
 
 All of that fitting in consumer grade hardware (**10gb ram limit**), currently around **8gb**, which could be further decreased mainly by using smaller, fine-tunned models.
 
----
+
+
 
 ## 🚀 How to run it
 
@@ -49,7 +52,8 @@ All of that fitting in consumer grade hardware (**10gb ram limit**), currently a
    ```
 5. Press <kbd>Esc</kbd> to stop a running task
 
----
+
+
 
 ## 🧠 Technology
 
@@ -61,13 +65,17 @@ All of that fitting in consumer grade hardware (**10gb ram limit**), currently a
 
 **Models tried before:** `LiquidAI/LFM3-Omni-2B`, `unsloth/NVIDIA-Nemotron-3.5-Bolt-E4B`, `LiquidAI/LFM3-VL-2B`. All of these models turned out to be suboptimal on results and reliability, even though they exceeded on speed.
 
+
+
+
 ### A few words on the technology chosen for this project
 
 - A small model is bad at writing long structured text like JSON or a long plan, it kept making up names, copying the examples of its prompt and mixing the formats up. One short step at a time, a line that starts with one of a few words, is something it can do, so that is what the tasks are made of.
 - Each model only does what it is good at: the brain thinks and writes, the Vision model points, the Decision model chooses. The Decision model is small and fast, so it can check every step.
 - The code checks what the models say where it can, like the window name for `DONE` and the website for `GO`, as small models say "done" too easily and copy the text of their prompt.
 
----
+
+
 
 ## 🤖 When and why AI was used and when and why it was NOT used
 
@@ -93,7 +101,8 @@ The rest was written by hand.
 
 Most of the comments were written by Claude (which it did quite well).
 
----
+
+
 
 ## 😅 Fun fact
 
