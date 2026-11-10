@@ -4,6 +4,9 @@ A simple computer control by voice project writte in a 3 days after work :)
 ## 🎬 "Fancy" demo
 [![Watch the video](https://img.youtube.com/vi/0CSZ1eEgQK4/hqdefault.jpg)](https://www.youtube.com/embed/0CSZ1eEgQK4)
 
+[<img src="https://img.youtube.com/vi/0CSZ1eEgQK4/hqdefault.jpg" width="600" height="300"
+/>](https://www.youtube.com/embed/0CSZ1eEgQK4)
+
 
 
 ## 💭 Thought process for this project (finding what to build)
